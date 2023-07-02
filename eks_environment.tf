@@ -9,6 +9,7 @@ terraform {
 }
 
 provider "aws" {
+  #may not need these
   access_key = var.AccessKey
   secret_key = var.SecretKey
   region = var.region
@@ -34,7 +35,16 @@ resource "aws_internet_gateway" "my_igw" {
 resource "aws_subnet" "my_subnet" {
   vpc_id  = aws_vpc.my_vpc.id
   cidr_block = "10.0.0.0/24"
-  availability_zone = "us-west-2"
+  availability_zone = "us-east-1b"
+  tags = {
+    Name = "my-subnet"
+  }
+}
+
+resource "aws_subnet" "my_other_subnet" {
+  vpc_id  = aws_vpc.my_vpc.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
   tags = {
     Name = "my-subnet"
   }
@@ -80,9 +90,34 @@ EOF
 }
 
 #Policy attachment
-resource "aws_iam_role_policy_attachment" "my_eks_admin_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "EKS_cluster_policy_attachment" {
   role      = aws_iam_role.my_eks_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSAdminPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  #This policy provides Kubernetes the permissions it requires to manage resources on your behalf.
+  #Kubernetes requires Ec2:CreateTags permissions to place identifying information on EC2 resources
+  #including but not limited to Instances, Security Groups, and Elastic Network Interfaces.
+
+}
+
+resource "aws_iam_role_policy_attachment" "EKS_service_policy_attachment" {
+  role      = aws_iam_role.my_eks_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  #This policy allows Amazon Elastic Container Service for Kubernetes to create and manage the necessary resources to operate EKS Clusters.
+}
+
+resource "aws_iam_role_policy_attachment" "EKS_WorkerNode_policy_attachment" {
+  role      = aws_iam_role.my_eks_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  #This policy allows Amazon EKS worker nodes to connect to Amazon EKS Clusters.
+}
+
+resource "aws_iam_role_policy_attachment" "EKS_CNI_policy_attachment" {
+  role      = aws_iam_role.my_eks_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  #This policy provides the Amazon VPC CNI Plugin (amazon-vpc-cni-k8s)
+  #the permissions it requires to modify the IP address configuration on your EKS worker nodes.
+  #This permission set allows the CNI to list, describe, and modify Elastic Network Interfaces on your behalf.
+  #More information on the AWS VPC CNI Plugin is available here: https://github.com/aws/amazon-vpc-cni-k8s
 }
 
 #create the actual EKS cluster
@@ -90,7 +125,7 @@ resource "aws_eks_cluster" "my_cluster" {
   name = "my-cluster"
   role_arn = aws_iam_role.my_eks_role.arn
   vpc_config {
-    subnet_ids = [aws_subnet.my_subnet.id]
+    subnet_ids = [aws_subnet.my_subnet.id, aws_subnet.my_other_subnet.id]
     security_group_ids = [aws_security_group.my_sg.id]
   }
 }

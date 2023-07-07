@@ -95,8 +95,8 @@ module "eks" {
       instance_types = ["t3.micro"]
 
       min_size     = 1
-      max_size     = 3
-      desired_size = 2
+      max_size     = 4
+      desired_size = 3
     }
 
 #     two = {
@@ -108,7 +108,7 @@ module "eks" {
 #       max_size     = 2
 #       desired_size = 1
 #     }
-#   }
+  }
 }
 
 
@@ -139,4 +139,12 @@ resource "aws_eks_addon" "ebs-csi" {
   }
 }
 
+#Outputs
+output "eks_cluster_endpoint" {
+  value = aws_eks_cluster.my_cluster.endpoint
+}
+
+output "eks_cluster_certificate_authority_data" {
+  value = aws_eks_cluster.my_cluster.certificate_authority.0.data
+}
 

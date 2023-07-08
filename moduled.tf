@@ -139,12 +139,28 @@ resource "aws_eks_addon" "ebs-csi" {
   }
 }
 
-#Outputs
-# output "eks_cluster_endpoint" {
-#   value = aws_eks_cluster.my_cluster.endpoint
-# }
-#
-# output "eks_cluster_certificate_authority_data" {
-#   value = aws_eks_cluster.my_cluster.certificate_authority.0.data
-# }
 
+output "cluster_endpoint" {
+  description = "Endpoint for EKS control plane"
+  value       = module.eks.cluster_endpoint
+}
+
+output "cluster_security_group_id" {
+  description = "Security group ids attached to the cluster control plane"
+  value       = module.eks.cluster_security_group_id
+}
+
+output "region" {
+  description = "AWS region"
+  value       = var.region
+}
+
+output "cluster_name" {
+  description = "Kubernetes Cluster Name"
+  value       = module.eks.cluster_name
+}
+
+output "cluster_nodegroup_iam" {
+  description = "nodegroup iam attached to the nodegroup"
+  value       = module.eks.module.eks_managed_node_group["one"].aws_iam_role.this[0]
+}

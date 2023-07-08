@@ -6,12 +6,35 @@
 #       version = "~> 5.4"
 #     }
 #   }
+#   kubernetes = {
+#     source = "hashicorp/kubernetes"
+#     version = "~> 2.15.0"
+#   }
 # }
 #
 # provider "aws" {
 #   region = var.region
 # }
 #
+# provider "kubernetes" {
+#   host            = module.eks.cluster.endpoint
+#   cluster_ca_certificate = base64decode(module.eks.cluster.certificate_authority[0].data)
+#   token                  = data.aws_eks_cluster_auth.eks.token
+# }
+#
+# ## variables
+#
+# variable "region" {
+#     type = string
+#     default = "us-east-1"
+# }
+#
+# variable "cluster_name" {
+#     description = "EKS cluster name"
+#     type = string
+# }
+#
+# #maybe the roles to be assuming
 # ## new vpc
 # resource "aws_vpc" "my_vpc" {
 #   cidr_block = "10.0.0.0/16"

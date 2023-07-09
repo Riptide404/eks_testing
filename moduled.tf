@@ -159,8 +159,3 @@ output "cluster_name" {
   description = "Kubernetes Cluster Name"
   value       = module.eks.cluster_name
 }
-
-output "cluster_nodegroup_iam" {
-  description = "nodegroup iam attached to the nodegroup"
-  value       = module.eks.module.eks_managed_node_group["one"].aws_iam_role.this[0]
-}

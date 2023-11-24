@@ -1,13 +1,5 @@
 
 #----------------------
-# variables
-#----------------------
-
-variable "eksctl-dev-cluster-ClusterSecurityGroupId" {
-  description = "This variable was an imported value in the Cloudformation Template."
-}
-
-#----------------------
 # resources
 #----------------------
 

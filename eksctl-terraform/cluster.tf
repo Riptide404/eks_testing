@@ -99,17 +99,17 @@ resource "aws_eks_cluster" "control_plane" {
   }
 }
 #no real controls just has the connection between control plane and worker nodes
-#10/20: dont care looks good
+# security group needs to be created after the vpc, but control plane can be created after the security group
 resource "aws_security_group" "control_plane_security_group" {
   description = "Communication between the control plane and worker nodegroups"
   vpc_id = aws_vpc.vpc.arn
 
   ingress {
-    description                  = "Allow managed and unmanaged nodes to communicate with each other (all ports)"
-    from_port                    = 0
-    to_port                      = 65535
-    protocol                     = "-1"
-    security_groups              = [aws_eks_cluster.control_plane.cluster_id]
+    description      = "Allow managed and unmanaged nodes to communicate with each other (all ports)"
+    from_port        = 0
+    to_port          = 65535
+    protocol         = "-1"
+    self             = true
   }
 
   ingress {
@@ -125,7 +125,7 @@ resource "aws_security_group" "control_plane_security_group" {
     from_port   = 0
     to_port     = 65535
     protocol    = "-1"
-    security_groups = [aws_eks_cluster.control_plane.cluster_id]
+    self        = true
   }
   tags = {
     Name = "${local.stack_name}/ControlPlaneSecurityGroup"

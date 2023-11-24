@@ -5,11 +5,6 @@ terraform {
         version = "~> 4.47.0"
       }
 
-      random = {
-        source  = "hashicorp/random"
-        version = "~> 3.4.3"
-      }
-
       tls = {
         source  = "hashicorp/tls"
         version = "~> 4.0.4"
@@ -37,12 +32,7 @@ variable "region" {
 data "aws_availability_zones" "available" {}
 
 locals {
-  cluster_name = "my-eks-${random_string.suffix.result}"
-}
-
-resource "random_string" "suffix" {
-  length  = 8
-  special = false
+  cluster_name = "my-eks"
 }
 
 module "vpc" {

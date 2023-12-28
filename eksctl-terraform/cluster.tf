@@ -64,6 +64,15 @@ locals {
 #----------------------
 # resources
 #----------------------
+# need a vpc
+resource "aws_vpc" "vpc" {
+ cidr_block = "192.168.0.0/16"
+ enable_dns_support = true
+ enable_dns_hostnames = true
+ tags = {
+  Name = "vpc"
+ }
+}
 
 resource "aws_security_group" "cluster_shared_node_security_group" {
   description = "Communication between all nodes in the cluster"
@@ -74,17 +83,16 @@ resource "aws_security_group" "cluster_shared_node_security_group" {
 }
 #the actula eks cluster resource that is in aws it shows up in the console under aws eks
 #we call it a control plane because this is the central controller of the eks cluster
-#10/17: this looks good
 resource "aws_eks_cluster" "control_plane" {
   kubernetes_network_config {
     ip_family = "ipv4"
   }
   name = "dev"
   vpc_config {
-    endpoint_private_access = false
+    endpoint_private_access = true
     endpoint_public_access = false
     security_group_ids = [
-      aws_security_group.control_plane_security_group.arn
+      aws_security_group.control_plane_security_group.id
     ]
     subnet_ids = [
       aws_subnet.subnet_private_useast1_a.id,
@@ -97,6 +105,11 @@ resource "aws_eks_cluster" "control_plane" {
   tags = {
     Name = "${local.stack_name}/ControlPlane"
   }
+  depends_on = [ 
+    aws_eks_node_group.managed_node_group,
+    aws_iam_role.aws_iam_role.service_role,
+    aws_security_group.control_plane_security_group
+  ]
 }
 #no real controls just has the connection between control plane and worker nodes
 # security group needs to be created after the vpc, but control plane can be created after the security group
@@ -131,30 +144,30 @@ resource "aws_security_group" "control_plane_security_group" {
     Name = "${local.stack_name}/ControlPlaneSecurityGroup"
   }
 }
+#--- Dont need these since we are only making a private vpc ---
+# resource "aws_internet_gateway" "internet_gateway" {
+#   tags = {
+#     Name = "${local.stack_name}/InternetGateway"
+#   }
+# }
 
-resource "aws_internet_gateway" "internet_gateway" {
-  tags = {
-    Name = "${local.stack_name}/InternetGateway"
-  }
-}
+# resource "aws_route" "nat_private_subnet_route_useast1_a" {
+#   destination_cidr_block = "0.0.0.0/0"
+#   nat_gateway_id = aws_nat_gateway.nat_gateway.id
+#   route_table_id = aws_route_table.private_route_table_useast1_a.id
+# }
 
-resource "aws_route" "nat_private_subnet_route_useast1_a" {
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id = aws_nat_gateway.nat_gateway.association_id
-  route_table_id = aws_route_table.private_route_table_useast1_a.id
-}
+# resource "aws_route" "nat_private_subnet_route_useast1_b" {
+#   destination_cidr_block = "0.0.0.0/0"
+#   nat_gateway_id = aws_nat_gateway.nat_gateway.id
+#   route_table_id = aws_route_table.private_route_table_useast1_b.id
+# }
 
-resource "aws_route" "nat_private_subnet_route_useast1_b" {
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id = aws_nat_gateway.nat_gateway.association_id
-  route_table_id = aws_route_table.private_route_table_useast1_b.id
-}
-
-resource "aws_route" "nat_private_subnet_route_useast1_d" {
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id = aws_nat_gateway.nat_gateway.association_id
-  route_table_id = aws_route_table.private_route_table_useast1_d.id
-}
+# resource "aws_route" "nat_private_subnet_route_useast1_d" {
+#   destination_cidr_block = "0.0.0.0/0"
+#   nat_gateway_id = aws_nat_gateway.nat_gateway.id
+#   route_table_id = aws_route_table.private_route_table_useast1_d.id
+# }
 
 data "aws_iam_policy_document" "cloudwatch_metrics" {
   statement {

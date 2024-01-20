@@ -119,7 +119,7 @@ resource "aws_security_group" "control_plane_security_group" {
   ingress {
     description      = "Allow managed and unmanaged nodes to communicate with each other (all ports)"
     from_port        = 0
-    to_port          = 65535
+    to_port          = 0
     protocol         = "-1"
     self             = true
   }
@@ -127,7 +127,7 @@ resource "aws_security_group" "control_plane_security_group" {
   ingress {
     description = "Allow nodes to communicate with each other (all ports)"
     from_port   = 0
-    to_port     = 65535
+    to_port     = 0
     protocol    = "-1"
     self        = true
   }
@@ -135,7 +135,7 @@ resource "aws_security_group" "control_plane_security_group" {
   ingress {
     description = "Allow unmanaged nodes to communicate with control plane (all ports)"
     from_port   = 0
-    to_port     = 65535
+    to_port     = 0
     protocol    = "-1"
     self        = true
   }
@@ -296,7 +296,7 @@ resource "aws_iam_role" "service_role" {
 resource "aws_subnet" "subnet_private_useast1_a" {
   availability_zone = "us-east-1a"
   cidr_block = "192.168.96.0/19"
-  vpc_id = aws_vpc.vpc.arn
+  vpc_id = aws_vpc.vpc.id
   tags = {
     Name = "${local.stack_name}/SubnetPrivateUSEAST1A"
   }
@@ -305,7 +305,7 @@ resource "aws_subnet" "subnet_private_useast1_a" {
 resource "aws_subnet" "subnet_private_useast1_b" {
   availability_zone = "us-east-1b"
   cidr_block = "192.168.128.0/19"
-  vpc_id = aws_vpc.vpc.arn
+  vpc_id = aws_vpc.vpc.id
   tags = {
     Name = "${local.stack_name}/SubnetPrivateUSEAST1B"
   }
@@ -314,7 +314,7 @@ resource "aws_subnet" "subnet_private_useast1_b" {
 resource "aws_subnet" "subnet_private_useast1_d" {
   availability_zone = "us-east-1d"
   cidr_block = "192.168.160.0/19"
-  vpc_id = aws_vpc.vpc.arn
+  vpc_id = aws_vpc.vpc.id
   tags = {
     Name = "${local.stack_name}/SubnetPrivateUSEAST1D"
   }

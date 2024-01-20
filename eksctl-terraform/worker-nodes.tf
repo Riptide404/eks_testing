@@ -59,10 +59,7 @@ data "aws_iam_policy_document" "node_role_policy" {
       "sts:AssumeRole"
     ]
     effect = "Allow"
-    principals {
-      type = "Service"
-      identifiers = local.mappings["ServicePrincipalPartitionMap"][data.aws_partition.current.partition]["EC2"]
-    }
+    resources = ["*"]
   }
 }
 

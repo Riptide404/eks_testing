@@ -64,19 +64,18 @@ locals {
 #----------------------
 # resources
 #----------------------
-# need a vpc
 resource "aws_vpc" "vpc" {
- cidr_block = "192.168.0.0/16"
- enable_dns_support = true
- enable_dns_hostnames = true
- tags = {
-  Name = "vpc"
- }
+  cidr_block = "192.168.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support = true
+  tags = {
+    Name = "${local.stack_name}/VPC"
+  }
 }
 
 resource "aws_security_group" "cluster_shared_node_security_group" {
   description = "Communication between all nodes in the cluster"
-  vpc_id = aws_vpc.vpc.arn
+  vpc_id = aws_vpc.vpc.id
   tags = {
     Name = "${local.stack_name}/ClusterSharedNodeSecurityGroup"
   }
@@ -106,8 +105,8 @@ resource "aws_eks_cluster" "control_plane" {
     Name = "${local.stack_name}/ControlPlane"
   }
   depends_on = [ 
-    aws_eks_node_group.managed_node_group,
-    aws_iam_role.aws_iam_role.service_role,
+    # aws_eks_node_group.managed_node_group,
+    aws_iam_role.service_role,
     aws_security_group.control_plane_security_group
   ]
 }
@@ -115,7 +114,7 @@ resource "aws_eks_cluster" "control_plane" {
 # security group needs to be created after the vpc, but control plane can be created after the security group
 resource "aws_security_group" "control_plane_security_group" {
   description = "Communication between the control plane and worker nodegroups"
-  vpc_id = aws_vpc.vpc.arn
+  vpc_id = aws_vpc.vpc.id
 
   ingress {
     description      = "Allow managed and unmanaged nodes to communicate with each other (all ports)"
@@ -186,15 +185,16 @@ resource "aws_iam_policy" "policy_cloud_watch_metrics" {
 }
 
 data "aws_iam_policy_document" "elb_permissions_policy" {
-  statement {
-    actions = [
-      "ec2:DescribeAccountAttributes",
-      "ec2:DescribeAddresses",
-      "ec2:DescribeInternetGateways"
-    ]
-    resources = "*"
-    effect = "Allow"
-  }
+ statement {
+   actions = [
+     "elasticloadbalancing:*",
+     "ec2:DescribeAccountAttributes",
+     "ec2:DescribeAddresses",
+     "ec2:DescribeInternetGateways"
+   ]
+   resources = ["*"]
+   effect = "Allow"
+ }
 }
 
 resource "aws_iam_policy" "policy_elb_permissions" {
@@ -204,28 +204,28 @@ resource "aws_iam_policy" "policy_elb_permissions" {
 }
 
 resource "aws_route_table" "private_route_table_useast1_a" {
-  vpc_id = aws_vpc.vpc.arn
+  vpc_id = aws_vpc.vpc.id
   tags = {
     Name = "${local.stack_name}/PrivateRouteTableUSEAST1A"
   }
 }
 
 resource "aws_route_table" "private_route_table_useast1_b" {
-  vpc_id = aws_vpc.vpc.arn
+  vpc_id = aws_vpc.vpc.id
   tags = {
     Name = "${local.stack_name}/PrivateRouteTableUSEAST1B"
   }
 }
 
 resource "aws_route_table" "private_route_table_useast1_d" {
-  vpc_id = aws_vpc.vpc.arn
+  vpc_id = aws_vpc.vpc.id
   tags = {
     Name = "${local.stack_name}/PrivateRouteTableUSEAST1D"
   }
 }
 
 # resource "aws_route_table" "public_route_table" {
-#   vpc_id = aws_vpc.vpc.arn
+#   vpc_id = aws_vpc.vpc.id
 #   tags = {
 #     Name = "${local.stack_name}/PublicRouteTable"
 #   }
@@ -276,7 +276,7 @@ data "aws_iam_policy_document" "service_role_policy" {
     effect = "Allow"
     principals {
       type    = "Service"
-      identifiers = local.mappings["ServicePrincipalPartitionMap"][data.aws_partition.current.partition]["EKS"]
+      identifiers = ["eks.amazonaws.com"]
     }
   }
 }
@@ -298,7 +298,6 @@ resource "aws_subnet" "subnet_private_useast1_a" {
   cidr_block = "192.168.96.0/19"
   vpc_id = aws_vpc.vpc.arn
   tags = {
-    kubernetes.io/role/internal-elb = "1"
     Name = "${local.stack_name}/SubnetPrivateUSEAST1A"
   }
 }
@@ -308,7 +307,6 @@ resource "aws_subnet" "subnet_private_useast1_b" {
   cidr_block = "192.168.128.0/19"
   vpc_id = aws_vpc.vpc.arn
   tags = {
-    kubernetes.io/role/internal-elb = "1"
     Name = "${local.stack_name}/SubnetPrivateUSEAST1B"
   }
 }
@@ -318,7 +316,6 @@ resource "aws_subnet" "subnet_private_useast1_d" {
   cidr_block = "192.168.160.0/19"
   vpc_id = aws_vpc.vpc.arn
   tags = {
-    kubernetes.io/role/internal-elb = "1"
     Name = "${local.stack_name}/SubnetPrivateUSEAST1D"
   }
 }
@@ -329,7 +326,6 @@ resource "aws_subnet" "subnet_private_useast1_d" {
 #   map_public_ip_on_launch = True
 #   vpc_id = aws_vpc.vpc.arn
 #   tags = {
-#     kubernetes.io/role/elb = "1"
 #     Name = "${local.stack_name}/SubnetPublicUSEAST1A"
 #   }
 # }
@@ -340,7 +336,6 @@ resource "aws_subnet" "subnet_private_useast1_d" {
 #   map_public_ip_on_launch = True
 #   vpc_id = aws_vpc.vpc.arn
 #   tags = {
-#     kubernetes.io/role/elb = "1"
 #     Name = "${local.stack_name}/SubnetPublicUSEAST1B"
 #   }
 # }
@@ -351,19 +346,9 @@ resource "aws_subnet" "subnet_private_useast1_d" {
 #   map_public_ip_on_launch = True
 #   vpc_id = aws_vpc.vpc.arn
 #   tags = {
-#     kubernetes.io/role/elb = "1"
 #     Name = "${local.stack_name}/SubnetPublicUSEAST1D"
 #   }
 # }
-
-resource "aws_vpc" "vpc" {
-  cidr_block = "192.168.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support = true
-  tags = {
-    Name = "${local.stack_name}/VPC"
-  }
-}
 
 resource "aws_vpn_gateway" "vpn_gateway" {
   tags = {

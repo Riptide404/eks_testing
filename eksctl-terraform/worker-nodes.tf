@@ -24,8 +24,8 @@ resource "aws_eks_node_group" "managed_node_group" {
     "t3.medium"
   ]
   labels = {
-    alpha.eksctl.io/cluster-name = "dev"
-    alpha.eksctl.io/nodegroup-name = "standard-workers"
+    cluster-name = "dev"
+    nodegroup-name = "standard-workers"
   }
 
   launch_template {
@@ -41,10 +41,15 @@ resource "aws_eks_node_group" "managed_node_group" {
     max_size = 4
     min_size = 1
   }
-  subnet_ids = aws_eks_cluster.control_plane.vpc_config.subnet_ids
+  #this should have been made dynamic
+  subnet_ids = [
+      aws_subnet.subnet_private_useast1_a.id,
+      aws_subnet.subnet_private_useast1_b.id,
+      aws_subnet.subnet_private_useast1_d.id
+  ]
   tags = {
-    alpha.eksctl.io/nodegroup-name = "standard-workers"
-    alpha.eksctl.io/nodegroup-type = "managed"
+    nodegroup-name = "standard-workers"
+    nodegroup-type = "managed"
   }
 }
 #data block for iam role policy

@@ -58,8 +58,8 @@ data "aws_iam_policy_document" "node_role_policy" {
     actions = [
       "sts:AssumeRole"
     ]
-    effect = "Allow"
     resources = ["*"]
+    effect = "Allow"
   }
 }
 
@@ -73,6 +73,6 @@ resource "aws_iam_role" "node_instance_role" {
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   ]
   tags = {
-    Name = "${local.stack_name}/NodeInstanceRole"
+    Name = "NodeInstanceRole"
   }
 }

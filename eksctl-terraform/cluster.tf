@@ -115,23 +115,6 @@ resource "aws_eks_cluster" "control_plane" {
 resource "aws_security_group" "control_plane_security_group" {
   description = "Communication between the control plane and worker nodegroups"
   vpc_id = aws_vpc.vpc.id
-
-  ingress {
-    description      = "Allow managed and unmanaged nodes to communicate with each other (all ports)"
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    self             = true
-  }
-
-  ingress {
-    description = "Allow nodes to communicate with each other (all ports)"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    self        = true
-  }
-
   ingress {
     description = "Allow unmanaged nodes to communicate with control plane (all ports)"
     from_port   = 0

@@ -123,7 +123,7 @@ resource "aws_security_group" "control_plane_security_group" {
     self        = true
   }
   tags = {
-    Name = "${local.stack_name}/ControlPlaneSecurityGroup"
+    Name = "ControlPlaneSecurityGroup"
   }
 }
 #--- Dont need these since we are only making a private vpc ---

@@ -52,20 +52,22 @@ resource "aws_eks_node_group" "managed_node_group" {
     nodegroup-type = "managed"
   }
 }
-#data block for iam role policy
-data "aws_iam_policy_document" "node_role_policy" {
-  statement {
-    actions = [
-      "sts:AssumeRole"
-    ]
-    resources = ["*"]
-    effect = "Allow"
-  }
-}
 
 resource "aws_iam_role" "node_instance_role" {
   name = "node_instance_role"
-  assume_role_policy = data.aws_iam_policy_document.node_role_policy.json
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
     "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",

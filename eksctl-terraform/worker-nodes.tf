@@ -20,9 +20,6 @@ resource "aws_launch_template" "launch_template" {
 resource "aws_eks_node_group" "managed_node_group" {
   ami_type = "AL2_x86_64"
   cluster_name = "dev"
-  instance_types = [
-    "t3.medium"
-  ]
   labels = {
     cluster-name = "dev"
     nodegroup-name = "standard-workers"

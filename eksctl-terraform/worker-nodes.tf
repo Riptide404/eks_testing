@@ -7,12 +7,21 @@ resource "aws_launch_template" "launch_template" {
   name_prefix = "k8-"
   instance_type = "t3.micro"
   user_data = base64encode(<<EOF
-  #!/bin/bash
-  yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-  systemctl enable amazon-ssm-agent
-  systemctl start amazon-ssm-agent
-  EOF
-  )
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+--==MYBOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+
+#!/bin/bash
+yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
+/etc/eks/bootstrap.sh dev
+
+--==MYBOUNDARY==--
+EOF
+ )
   
 }
 

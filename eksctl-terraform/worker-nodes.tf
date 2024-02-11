@@ -58,7 +58,10 @@ resource "aws_eks_node_group" "managed_node_group" {
     nodegroup-type = "managed"
   }
   #need this resource to not build until the control plane is built
-  depends_on = [aws_eks_cluster.control_plane]
+  depends_on = [
+    aws_eks_cluster.control_plane,
+    aws_iam_role.node_instance_role
+    ]
 }
 
 resource "aws_iam_role" "node_instance_role" {

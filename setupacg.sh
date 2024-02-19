@@ -3,7 +3,7 @@
 
 
 
-(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/cloud_user/.bash_profile
+(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/cloudshell-user/.bash_profile
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 sudo yum groupinstall 'Development Tools' -y

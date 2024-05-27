@@ -3,7 +3,8 @@
 
 
 
-(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/cloudshell-user/.bash_profile
+# may not need this -> (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/cloudshell-user/.bash_profile
+(echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /home/cloudshell-user/.bashrc
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 sudo yum groupinstall 'Development Tools' -y
@@ -12,6 +13,9 @@ sudo yum groupinstall 'Development Tools' -y
 
 brew install awscli kubernetes-cli terraform eksctl
 
+####---------------------------------
+#  End of Setting up ACG cloudshell
+####---------------------------------
 
 git clone https://github.com/Riptide404/eks_testing.git
 
@@ -35,3 +39,9 @@ eksctl create cluster --name dev --region us-east-1 --zones=us-east-1a,us-east-1
 #Amazon vpc CNI
 #CoreDNS
 #kube-proxy
+
+
+#-------------------------------------
+# setup rhel
+#-------------------------------------
+
